@@ -1,10 +1,10 @@
-//! Forensic layer over [`protobuf_core`].
+//! Forensic layer over [`protobuf_forensic_core`].
 //!
 //! [`analyze`] decodes a schemaless protobuf blob into a path-addressed tree of
 //! [`AnalyzedField`]s and adds two forensic value-adds the raw wire decode
 //! cannot:
 //!
-//! 1. **Ambiguity scoring for length-delimited fields.** `protobuf-core` picks a
+//! 1. **Ambiguity scoring for length-delimited fields.** `protobuf-forensic-core` picks a
 //!    single message-first interpretation; here each `LEN` field also carries a
 //!    [`confidence`](AnalyzedField::confidence) and [`notes`](AnalyzedField::notes)
 //!    naming the *other* plausible readings (a payload that parses as a message
@@ -21,9 +21,9 @@
 
 mod timestamps;
 
-use protobuf_core::{Error, Field, FieldValue, LenInterp, LenValue, Limits, WireType};
+use protobuf_forensic_core::{Error, Field, FieldValue, LenInterp, LenValue, Limits, WireType};
 
-pub use protobuf_core;
+pub use protobuf_forensic_core;
 pub use timestamps::{TimeSource, TimestampHit};
 
 /// Confidence that a `LEN` payload parsing cleanly as a structured message — and
@@ -116,7 +116,7 @@ impl Default for Options {
 /// Decode and analyse a protobuf blob with default [`Options`].
 ///
 /// # Errors
-/// Propagates any [`protobuf_core::Error`] from the wire decode.
+/// Propagates any [`protobuf_forensic_core::Error`] from the wire decode.
 pub fn analyze(bytes: &[u8]) -> Result<Analysis, Error> {
     analyze_with(bytes, &Options::default())
 }
@@ -124,9 +124,9 @@ pub fn analyze(bytes: &[u8]) -> Result<Analysis, Error> {
 /// Decode and analyse a protobuf blob with explicit [`Options`].
 ///
 /// # Errors
-/// Propagates any [`protobuf_core::Error`] from the wire decode.
+/// Propagates any [`protobuf_forensic_core::Error`] from the wire decode.
 pub fn analyze_with(bytes: &[u8], options: &Options) -> Result<Analysis, Error> {
-    let fields = protobuf_core::decode_with_limits(bytes, options.limits)?;
+    let fields = protobuf_forensic_core::decode_with_limits(bytes, options.limits)?;
     Ok(analyze_fields(&fields, options))
 }
 
@@ -192,7 +192,7 @@ fn analyze_one(field: &Field, prefix: &str, options: &Options) -> AnalyzedField 
 }
 
 /// Classify a length-delimited field, scoring the ambiguity of the reading
-/// `protobuf-core` chose and noting the plausible alternatives.
+/// `protobuf-forensic-core` chose and noting the plausible alternatives.
 fn classify_len(
     len: &LenValue,
     path: &str,
@@ -204,7 +204,7 @@ fn classify_len(
             let analyzed = walk(inner, path, options);
             // A payload that parses as a structured message *and* is printable
             // text is genuinely ambiguous — short ASCII can parse as a message.
-            if let Some(text) = protobuf_core::printable_utf8(&len.raw) {
+            if let Some(text) = protobuf_forensic_core::printable_utf8(&len.raw) {
                 notes.push(format!("payload also decodes as UTF-8 text: {text:?}"));
                 (
                     AnalyzedValue::Message(analyzed),

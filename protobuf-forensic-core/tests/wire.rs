@@ -5,7 +5,7 @@
 //! derivable from the documented construction (tier-2), not invented.
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use protobuf_core::{
+use protobuf_forensic_core::{
     decode, decode_with_limits, zigzag_decode, Error, FieldValue, LenInterp, Limits, WireType,
 };
 
@@ -280,10 +280,10 @@ fn zigzag_decoding_matches_spec_table() {
 #[test]
 fn printable_utf8_predicate_is_public() {
     assert_eq!(
-        protobuf_core::printable_utf8(b"hello").as_deref(),
+        protobuf_forensic_core::printable_utf8(b"hello").as_deref(),
         Some("hello")
     );
-    assert!(protobuf_core::printable_utf8(&[0xff, 0xfe]).is_none());
+    assert!(protobuf_forensic_core::printable_utf8(&[0xff, 0xfe]).is_none());
 }
 
 #[test]

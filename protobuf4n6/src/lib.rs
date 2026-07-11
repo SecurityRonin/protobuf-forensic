@@ -34,7 +34,7 @@ pub enum Format {
 #[non_exhaustive]
 pub enum CliError {
     /// The wire decode failed.
-    Decode(protobuf_core::Error),
+    Decode(protobuf_forensic_core::Error),
     /// A `--hex` argument was not valid hex. Carries the offending character and
     /// its position (fail-loud, show-the-value).
     Hex {
@@ -57,8 +57,8 @@ impl fmt::Display for CliError {
 
 impl std::error::Error for CliError {}
 
-impl From<protobuf_core::Error> for CliError {
-    fn from(e: protobuf_core::Error) -> Self {
+impl From<protobuf_forensic_core::Error> for CliError {
+    fn from(e: protobuf_forensic_core::Error) -> Self {
         CliError::Decode(e)
     }
 }

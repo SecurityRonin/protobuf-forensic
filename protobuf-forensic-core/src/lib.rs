@@ -16,7 +16,7 @@
 //! ```
 //! // Field 1 = varint 150, then field 3 = submessage {1: 150}.
 //! let bytes = [0x08, 0x96, 0x01, 0x1a, 0x03, 0x08, 0x96, 0x01];
-//! let fields = protobuf_core::decode(&bytes).unwrap();
+//! let fields = protobuf_forensic_core::decode(&bytes).unwrap();
 //! assert_eq!(fields.len(), 2);
 //! assert_eq!(fields[0].number, 1);
 //! ```

@@ -4,11 +4,11 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 # Depends on timeglyph (MSRV 1.96), so this crate's floor follows the pinned
-# toolchain rather than the low core floor. Set honestly per crate: protobuf-core
+# toolchain rather than the low core floor. Set honestly per crate: protobuf-forensic-core
 # stays at 1.80 because it has no such dependency.
 rust-version = "1.96"
 readme = "README.md"
-description = "Forensic layer over protobuf-core — scores ambiguous length-delimited fields (message vs string vs bytes vs packed) with confidence and flags integer/fixed64 fields that decode as plausible timestamps via timeglyph."
+description = "Forensic layer over protobuf-forensic-core — scores ambiguous length-delimited fields (message vs string vs bytes vs packed) with confidence and flags integer/fixed64 fields that decode as plausible timestamps via timeglyph."
 repository = "https://github.com/SecurityRonin/protobuf-forensic"
 keywords = ["forensics", "protobuf", "dfir", "timestamp", "heuristics"]
 categories = ["parser-implementations"]
@@ -18,7 +18,7 @@ name = "protobuf_forensic"
 path = "src/lib.rs"
 
 [dependencies]
-protobuf-core = { workspace = true }
+protobuf-forensic-core = { workspace = true }
 timeglyph = { workspace = true }
 
 [lints]

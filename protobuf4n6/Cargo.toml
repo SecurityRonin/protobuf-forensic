@@ -23,7 +23,7 @@ name = "protobuf4n6"
 path = "src/main.rs"
 
 [dependencies]
-protobuf-core = { workspace = true }
+protobuf-forensic-core = { workspace = true }
 protobuf-forensic = { workspace = true }
 clap = { workspace = true }
 serde_json = { workspace = true }

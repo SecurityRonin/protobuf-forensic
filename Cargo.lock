@@ -492,24 +492,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "protobuf-core"
-version = "0.1.0"
-
-[[package]]
 name = "protobuf-forensic"
 version = "0.1.0"
 dependencies = [
- "protobuf-core",
+ "protobuf-forensic-core",
  "timeglyph",
 ]
+
+[[package]]
+name = "protobuf-forensic-core"
+version = "0.1.0"
 
 [[package]]
 name = "protobuf4n6"
 version = "0.1.0"
 dependencies = [
  "clap",
- "protobuf-core",
  "protobuf-forensic",
+ "protobuf-forensic-core",
  "serde_json",
 ]
 

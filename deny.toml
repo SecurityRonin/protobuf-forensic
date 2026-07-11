@@ -11,7 +11,7 @@ yanked = "deny"
 [licenses]
 version = 2
 # This crate is Apache-2.0; permit only permissive, non-copyleft licences. The
-# list spans protobuf-core (zero deps) and the protobuf-forensic tree pulled in
+# list spans protobuf-forensic-core (zero deps) and the protobuf-forensic tree pulled in
 # by timeglyph (jiff, forensicnomicon, serde): MPL-2.0/Unicode/CC0/BSL appear
 # there, all permissive/weak-copyleft and acceptable in a permissive tree.
 allow = [

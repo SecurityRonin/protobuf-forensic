@@ -16,7 +16,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
-use protobuf_core::{decode, Field, FieldValue, LenInterp};
+use protobuf_forensic_core::{decode, Field, FieldValue, LenInterp};
 
 fn protoc() -> Option<PathBuf> {
     if let Ok(p) = std::env::var("PROTOC") {

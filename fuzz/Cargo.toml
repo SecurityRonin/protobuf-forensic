@@ -14,8 +14,8 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 
-[dependencies.protobuf-core]
-path = "../protobuf-core"
+[dependencies.protobuf-forensic-core]
+path = "../protobuf-forensic-core"
 
 [dependencies.protobuf-forensic]
 path = "../protobuf-forensic"

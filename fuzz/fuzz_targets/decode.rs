@@ -7,5 +7,5 @@
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
-    let _ = protobuf_core::decode(data);
+    let _ = protobuf_forensic_core::decode(data);
 });
