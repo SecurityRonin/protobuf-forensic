@@ -1,0 +1,9 @@
+# Allow `unwrap()`/`expect()` inside test functions and `#[cfg(test)]` modules.
+# Production code keeps `clippy::unwrap_used = deny` (see workspace Cargo.toml);
+# tests legitimately unwrap to fail loudly, so this is the upstream-recommended
+# exception rather than scattering `#[allow]` across every test module.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+
+# Product/format names that look like code identifiers to doc_markdown.
+doc-valid-idents = ["protobuf", "protoc", "protoscope", "blackboxprotobuf", "decode_raw", "varint", "varints", "sint32", "sint64", "fixed32", "fixed64", "sfixed32", "sfixed64", "uint32", "uint64", "zigzag", "ZigZag", "LEB128", "WebKit", "UTF-8", "JSONL", "timeglyph", "PosixNs", "LevelDB", "CodedInputStream", "rust-protobuf", "wire_type", "field_number", "TLV"]

@@ -1,0 +1,45 @@
+[workspace]
+resolver = "2"
+members = ["protobuf-core", "protobuf-forensic", "protobuf4n6"]
+
+# Single source of truth for fields shared by every member (DRY): bump version /
+# edition / license here once; members inherit via `field.workspace = true`.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# The schemaless wire decoder, consumed by the forensic layer and the CLI.
+protobuf-core = { version = "0.1.0", path = "protobuf-core" }
+# The forensic heuristics + timeglyph timestamp flagging, consumed by protobuf4n6.
+protobuf-forensic = { version = "0.1.0", path = "protobuf-forensic" }
+# The fleet timestamp decipherer — runs candidate integer field values through
+# every timestamp epoch/format. Path dep for local-only build; switch to the
+# published `timeglyph = "0.4"` once that version is on crates.io.
+timeglyph = { version = "0.4", path = "../timeglyph" }
+# CLI argument parsing.
+clap = { version = "4", features = ["derive"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all                      = { level = "warn", priority = -1 }
+pedantic                 = { level = "warn", priority = -1 }
+correctness              = { level = "deny", priority = -1 }
+suspicious               = { level = "deny", priority = -1 }
+unwrap_used              = { level = "deny", priority = 0 }
+expect_used              = { level = "deny", priority = 0 }
+module_name_repetitions  = { level = "allow", priority = 1 }
+must_use_candidate       = { level = "allow", priority = 1 }
+missing_errors_doc       = { level = "allow", priority = 1 }
+missing_panics_doc       = { level = "allow", priority = 1 }
+cast_possible_truncation = { level = "allow", priority = 1 }
+cast_possible_wrap       = { level = "allow", priority = 1 }
+cast_sign_loss           = { level = "allow", priority = 1 }
+cast_precision_loss      = { level = "allow", priority = 1 }
+too_many_lines           = { level = "allow", priority = 1 }
+items_after_statements   = { level = "allow", priority = 1 }
+similar_names            = { level = "allow", priority = 1 }
+manual_let_else          = { level = "allow", priority = 1 }

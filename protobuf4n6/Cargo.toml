@@ -1,0 +1,31 @@
+[package]
+name = "protobuf4n6"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+# Application crate: declare the pinned dev toolchain as MSRV (nothing pins a
+# library dependency against the binary), unlike the published libs' low floor.
+rust-version = "1.96"
+readme = "README.md"
+# `authors` is required by cargo-deb (it derives the .deb copyright from it).
+authors = ["Albert Hui <albert@securityronin.com>"]
+description = "protobuf4n6 — a protoscope-style schemaless protobuf CLI: dump a protobuf blob (file, stdin, or hex) as an indented field tree, JSONL, or a protoscope-like format, with forensic timestamp flagging."
+repository = "https://github.com/SecurityRonin/protobuf-forensic"
+keywords = ["forensics", "protobuf", "dfir", "cli", "protoscope"]
+categories = ["command-line-utilities"]
+
+[lib]
+name = "protobuf4n6"
+path = "src/lib.rs"
+
+[[bin]]
+name = "protobuf4n6"
+path = "src/main.rs"
+
+[dependencies]
+protobuf-core = { workspace = true }
+protobuf-forensic = { workspace = true }
+clap = { workspace = true }
+
+[lints]
+workspace = true

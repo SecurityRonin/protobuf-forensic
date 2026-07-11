@@ -1,0 +1,22 @@
+[package]
+name = "protobuf-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+# Published library: a deliberately LOW, CI-verified MSRV (a compatibility
+# signal), distinct from the dev toolchain pin in rust-toolchain.toml. This crate
+# is dependency-free (pure std), so the floor can stay low. Raise only when a
+# newer-Rust feature is genuinely needed.
+rust-version = "1.80"
+readme = "README.md"
+description = "Schemaless Protocol Buffers wire-format decoder for forensics — decode raw protobuf bytes with no .proto into a recursive field tree, resolving length-delimited payloads to nested message, string, or bytes. Pure-Rust, no unsafe, panic-free."
+repository = "https://github.com/SecurityRonin/protobuf-forensic"
+keywords = ["forensics", "protobuf", "dfir", "decode", "wire-format"]
+categories = ["parser-implementations", "encoding"]
+
+[lib]
+name = "protobuf_core"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
