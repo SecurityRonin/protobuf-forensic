@@ -510,6 +510,7 @@ dependencies = [
  "clap",
  "protobuf-core",
  "protobuf-forensic",
+ "serde_json",
 ]
 
 [[package]]

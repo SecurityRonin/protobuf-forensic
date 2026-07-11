@@ -20,6 +20,9 @@ protobuf-forensic = { version = "0.1.0", path = "protobuf-forensic" }
 timeglyph = { version = "0.4", path = "../timeglyph" }
 # CLI argument parsing.
 clap = { version = "4", features = ["derive"] }
+# Machine-faithful JSONL output with correct escaping of arbitrary string/byte
+# values (already in the tree via timeglyph).
+serde_json = "1"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
