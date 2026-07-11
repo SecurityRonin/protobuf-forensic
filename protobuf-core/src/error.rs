@@ -156,3 +156,69 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::Error;
+
+    /// One representative of every variant, so `Display` and `offset` are each
+    /// exercised for all arms.
+    fn all_variants() -> Vec<Error> {
+        vec![
+            Error::TruncatedVarint { offset: 1 },
+            Error::OverlongVarint { offset: 2 },
+            Error::VarintOverflow { offset: 3 },
+            Error::UnexpectedEof {
+                what: "fixed32",
+                offset: 4,
+            },
+            Error::LengthOutOfRange {
+                value: 9,
+                available: 2,
+                offset: 5,
+            },
+            Error::InvalidWireType {
+                value: 6,
+                offset: 6,
+            },
+            Error::InvalidFieldNumber {
+                value: 0,
+                offset: 7,
+            },
+            Error::UnexpectedEndGroup {
+                field: 1,
+                offset: 8,
+            },
+            Error::UnterminatedGroup {
+                field: 1,
+                offset: 9,
+            },
+            Error::DepthLimitExceeded {
+                limit: 100,
+                offset: 10,
+            },
+        ]
+    }
+
+    #[test]
+    fn display_is_non_empty_and_names_the_offset() {
+        for (i, err) in all_variants().into_iter().enumerate() {
+            let rendered = err.to_string();
+            assert!(!rendered.is_empty());
+            // Every message ends by naming the byte offset it carries.
+            assert!(
+                rendered.contains(&err.offset().to_string()),
+                "message {rendered:?} should mention offset {}",
+                err.offset()
+            );
+            // Sanity: offsets are the ones we constructed (1..=10).
+            assert_eq!(err.offset(), i + 1);
+        }
+    }
+
+    #[test]
+    fn errors_are_std_error() {
+        let err = Error::TruncatedVarint { offset: 0 };
+        let _: &dyn std::error::Error = &err;
+    }
+}

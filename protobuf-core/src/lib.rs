@@ -205,13 +205,13 @@ pub fn zigzag_decode(n: u64) -> i64 {
 /// length, invalid wire type or field number, unbalanced group, or nesting past
 /// the depth limit) rather than panicking.
 pub fn decode(bytes: &[u8]) -> Result<Vec<Field>, Error> {
-    decode_with_limits(bytes, &Limits::default())
+    decode_with_limits(bytes, Limits::default())
 }
 
 /// Decode protobuf wire-format bytes into a field tree with explicit [`Limits`].
 ///
 /// # Errors
 /// See [`decode`].
-pub fn decode_with_limits(bytes: &[u8], limits: &Limits) -> Result<Vec<Field>, Error> {
+pub fn decode_with_limits(bytes: &[u8], limits: Limits) -> Result<Vec<Field>, Error> {
     reader::decode_message(bytes, limits)
 }

@@ -225,16 +225,30 @@ fn depth_bomb_degrades_without_panicking() {
     // 200 nested single-field submessages. Parsing stops treating them as
     // messages at the depth limit and degrades the deepest level to Bytes;
     // the call returns Ok (partial), never overflowing the stack.
+    fn put_varint(mut v: u64, out: &mut Vec<u8>) {
+        loop {
+            let mut b = (v & 0x7f) as u8;
+            v >>= 7;
+            if v != 0 {
+                b |= 0x80;
+            }
+            out.push(b);
+            if v == 0 {
+                break;
+            }
+        }
+    }
     let limits = Limits { max_depth: 16 };
-    // Build from the inside out: innermost is field 1 = 1 (`08 01`).
+    // Build from the inside out: innermost is field 1 = 1 (`08 01`), then wrap it
+    // 200 times in a field-3 LEN submessage with a correctly encoded varint length.
     let mut payload = vec![0x08, 0x01];
     for _ in 0..200 {
-        let len = u8::try_from(payload.len()).unwrap_or(0x7f);
-        let mut next = vec![0x1a, len]; // field 3, LEN
-        next.extend_from_slice(&payload[..len as usize]);
+        let mut next = vec![0x1a]; // field 3, LEN
+        put_varint(payload.len() as u64, &mut next);
+        next.extend_from_slice(&payload);
         payload = next;
     }
-    let fields = decode_with_limits(&payload, &limits).unwrap();
+    let fields = decode_with_limits(&payload, limits).unwrap();
     assert_eq!(fields[0].number, 3);
 }
 
