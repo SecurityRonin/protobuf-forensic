@@ -1,0 +1,35 @@
+[package]
+name = "protobuf-forensic-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+# Standalone workspace: cargo-fuzz builds this crate in isolation, not as a
+# member of the main workspace it fuzzes.
+[workspace]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.protobuf-core]
+path = "../protobuf-core"
+
+[dependencies.protobuf-forensic]
+path = "../protobuf-forensic"
+
+[[bin]]
+name = "decode"
+path = "fuzz_targets/decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "analyze"
+path = "fuzz_targets/analyze.rs"
+test = false
+doc = false
+bench = false
