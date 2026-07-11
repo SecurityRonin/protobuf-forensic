@@ -697,6 +697,8 @@ dependencies = [
 [[package]]
 name = "timeglyph"
 version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e3004d2a7489745a523d0f5a55f0de4ae50d0cc3c7bd5b9e221dd99b0a496ea"
 dependencies = [
  "clap",
  "csv",

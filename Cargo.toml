@@ -15,9 +15,8 @@ protobuf-core = { version = "0.1.0", path = "protobuf-core" }
 # The forensic heuristics + timeglyph timestamp flagging, consumed by protobuf4n6.
 protobuf-forensic = { version = "0.1.0", path = "protobuf-forensic" }
 # The fleet timestamp decipherer — runs candidate integer field values through
-# every timestamp epoch/format. Path dep for local-only build; switch to the
-# published `timeglyph = "0.4"` once that version is on crates.io.
-timeglyph = { version = "0.4", path = "../timeglyph" }
+# every timestamp epoch/format.
+timeglyph = { version = "0.4" }
 # CLI argument parsing.
 clap = { version = "4", features = ["derive"] }
 # Machine-faithful JSONL output with correct escaping of arbitrary string/byte
