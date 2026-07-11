@@ -218,7 +218,7 @@ fn try_message(raw: &[u8], depth: usize, limits: Limits) -> Result<Vec<Field>, E
 /// `Some(string)` iff `raw` is valid UTF-8 with no control characters other than
 /// tab / newline / carriage-return — the "printable-ish" test that keeps binary
 /// blobs (which happen to be valid UTF-8) from being mislabelled as text.
-fn printable_utf8(raw: &[u8]) -> Option<String> {
+pub(crate) fn printable_utf8(raw: &[u8]) -> Option<String> {
     let s = std::str::from_utf8(raw).ok()?;
     if s.chars()
         .all(|c| !c.is_control() || matches!(c, '\t' | '\n' | '\r'))

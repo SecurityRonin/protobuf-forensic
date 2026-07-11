@@ -188,6 +188,16 @@ impl LenValue {
     }
 }
 
+/// `Some(string)` iff `raw` is valid UTF-8 containing no control characters
+/// other than tab, newline, and carriage-return — the "printable-ish" test the
+/// decoder uses to tell a string payload from an opaque binary blob. Exposed so
+/// a forensic caller can re-apply the same predicate (e.g. to flag that a
+/// payload decoded as a message is *also* valid text).
+#[must_use]
+pub fn printable_utf8(raw: &[u8]) -> Option<String> {
+    reader::printable_utf8(raw)
+}
+
 /// Decode ZigZag-encoded `sint32`/`sint64` back to a signed value.
 ///
 /// A schemaless decoder cannot know whether a varint field is `sint` (ZigZag) or

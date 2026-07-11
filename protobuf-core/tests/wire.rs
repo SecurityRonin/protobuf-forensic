@@ -278,6 +278,15 @@ fn zigzag_decoding_matches_spec_table() {
 }
 
 #[test]
+fn printable_utf8_predicate_is_public() {
+    assert_eq!(
+        protobuf_core::printable_utf8(b"hello").as_deref(),
+        Some("hello")
+    );
+    assert!(protobuf_core::printable_utf8(&[0xff, 0xfe]).is_none());
+}
+
+#[test]
 fn wire_type_roundtrips() {
     for v in 0u8..=5 {
         let wt = WireType::from_u8(v, 0).unwrap();

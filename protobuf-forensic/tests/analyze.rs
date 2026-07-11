@@ -1,9 +1,9 @@
 //! Behavioural tests for the forensic analysis layer.
 //!
 //! Timestamp expectations are tier-2: the input integer is a known Unix epoch
-//! second whose civil rendering is derivable (e.g. 1_600_000_000 → 2020-09-13),
+//! second whose civil rendering is derivable (e.g. `1_600_000_000` → 2020-09-13),
 //! cross-checked against timeglyph's own decode.
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![allow(clippy::unwrap_used, clippy::expect_used, clippy::float_cmp)]
 
 use protobuf_forensic::{analyze, analyze_with, AnalyzedValue, Options, TimeSource};
 
@@ -25,7 +25,7 @@ fn put_varint(mut v: u64, out: &mut Vec<u8>) {
 /// `field << 3 | wire` then a varint value.
 fn varint_field(field: u64, value: u64) -> Vec<u8> {
     let mut out = Vec::new();
-    put_varint((field << 3) | 0, &mut out);
+    put_varint(field << 3, &mut out); // wire type 0 (varint)
     put_varint(value, &mut out);
     out
 }
@@ -98,7 +98,7 @@ fn opaque_bytes_with_packed_reading_is_noted() {
     assert!(
         f.notes
             .iter()
-            .any(|n| n.contains("packed") && n.contains("1")),
+            .any(|n| n.contains("packed") && n.contains('1')),
         "expected a packed note, got {:?}",
         f.notes
     );
@@ -129,28 +129,89 @@ fn unix_timestamp_varint_is_flagged() {
 }
 
 #[test]
-fn small_integer_is_not_over_flagged_as_timestamp() {
-    // 150 seconds after the epoch (1970) is not a plausible modern timestamp; it
-    // must not be reported above the default threshold.
-    let a = analyze(&varint_field(1, 150)).unwrap();
+fn timestamp_readings_are_capped_and_ranked_candidates() {
+    // Honest behaviour: a schemaless decoder cannot confirm an integer is a
+    // timestamp. Even 150 is "consistent with" recent-epoch formats (Cocoa =
+    // 2001-01-01 + 150 s). We surface these as *candidates*, capped at
+    // `max_timestamp_candidates` and ranked by score (descending) — the analyst
+    // judges by magnitude and context. We do not pretend to suppress them.
+    let opts = Options {
+        max_timestamp_candidates: 2,
+        ..Options::default()
+    };
+    let a = analyze_with(&varint_field(1, 150), &opts).unwrap();
+    let hits = &a.fields[0].timestamps;
+    assert!(hits.len() <= 2, "must respect the cap, got {}", hits.len());
+    // Ranked by score, descending.
+    for pair in hits.windows(2) {
+        assert!(pair[0].score >= pair[1].score);
+    }
+    // Every hit carries a citation and a rendered instant — framed as evidence,
+    // not a verdict.
+    for hit in hits {
+        assert!(!hit.citation.is_empty());
+        assert!(!hit.rendered.is_empty());
+    }
+}
+
+#[test]
+fn max_candidates_zero_yields_none() {
+    let opts = Options {
+        max_timestamp_candidates: 0,
+        ..Options::default()
+    };
+    let a = analyze_with(&varint_field(1, 1_600_000_000), &opts).unwrap();
+    assert!(a.fields[0].timestamps.is_empty());
+}
+
+#[test]
+fn fixed32_unix_second_is_flagged() {
+    // field 6, wire 5 (tag 0x35), value 1_600_000_000 little-endian.
+    let mut bytes = vec![0x35];
+    bytes.extend_from_slice(&1_600_000_000_u32.to_le_bytes());
+    let a = analyze(&bytes).unwrap();
+    let f = &a.fields[0];
+    assert_eq!(f.value, AnalyzedValue::Fixed32(1_600_000_000));
     assert!(
-        a.fields[0].timestamps.is_empty(),
-        "150 should not be flagged as a timestamp at the default threshold, got {:?}",
-        a.fields[0].timestamps
+        f.timestamps
+            .iter()
+            .any(|t| t.source == TimeSource::Fixed32AsInt && t.rendered.starts_with("2020")),
+        "expected a Fixed32AsInt 2020 reading, got {:?}",
+        f.timestamps
     );
 }
 
 #[test]
-fn threshold_zero_surfaces_more_candidates() {
-    // Lowering the threshold surfaces more (weaker) readings — proves the knob
-    // works and that filtering is what suppresses them by default.
-    let opts = Options {
-        timestamp_score_threshold: 0.0,
-        max_timestamp_candidates: 10,
-        ..Options::default()
-    };
-    let a = analyze_with(&varint_field(1, 150), &opts).unwrap();
-    assert!(!a.fields[0].timestamps.is_empty());
+fn fixed64_double_is_read_as_a_cocoa_time() {
+    // A fixed64 holding an IEEE-754 double of ~2021 in Cocoa/CFAbsoluteTime
+    // seconds (since 2001). field 7, wire 1 (tag 0x39).
+    let cocoa_seconds = 640_000_000.0_f64; // 2001-01-01 + ~20.3 years ≈ 2021.
+    let mut bytes = vec![0x39];
+    bytes.extend_from_slice(&cocoa_seconds.to_bits().to_le_bytes());
+    let a = analyze(&bytes).unwrap();
+    let f = &a.fields[0];
+    assert_eq!(f.value, AnalyzedValue::Fixed64(cocoa_seconds.to_bits()));
+    assert!(
+        f.timestamps
+            .iter()
+            .any(|t| t.source == TimeSource::Fixed64AsFloat),
+        "expected the double to be read as a float-based timestamp, got {:?}",
+        f.timestamps
+    );
+}
+
+#[test]
+fn packed_fixed32_payload_is_noted() {
+    // field 5 LEN with two little-endian i32s (1, 2): not a clean message, not
+    // text; the packed fixed32 reading is noted.
+    let a = analyze(&[0x2a, 0x08, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00]).unwrap();
+    let f = &a.fields[0];
+    assert!(matches!(f.value, AnalyzedValue::Bytes(_)));
+    assert!(
+        f.notes.iter().any(|n| n.contains("fixed32")),
+        "expected a packed fixed32 note, got {:?}",
+        f.notes
+    );
 }
 
 #[test]

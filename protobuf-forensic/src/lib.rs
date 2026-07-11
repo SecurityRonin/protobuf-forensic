@@ -21,7 +21,7 @@
 
 mod timestamps;
 
-use protobuf_core::{Error, Field, Limits, WireType};
+use protobuf_core::{Error, Field, FieldValue, LenInterp, LenValue, Limits, WireType};
 
 pub use protobuf_core;
 pub use timestamps::{TimeSource, TimestampHit};
@@ -133,6 +133,112 @@ pub fn analyze_with(bytes: &[u8], options: &Options) -> Result<Analysis, Error> 
 /// Analyse already-decoded [`Field`]s (no wire decode).
 #[must_use]
 pub fn analyze_fields(fields: &[Field], options: &Options) -> Analysis {
-    let _ = (fields, options);
-    unimplemented!("GREEN")
+    Analysis {
+        fields: walk(fields, "", options),
+    }
+}
+
+/// Analyse a sibling list of fields under `prefix`, producing dotted paths.
+fn walk(fields: &[Field], prefix: &str, options: &Options) -> Vec<AnalyzedField> {
+    fields
+        .iter()
+        .map(|f| analyze_one(f, prefix, options))
+        .collect()
+}
+
+fn analyze_one(field: &Field, prefix: &str, options: &Options) -> AnalyzedField {
+    let path = if prefix.is_empty() {
+        field.number.to_string()
+    } else {
+        format!("{prefix}.{}", field.number)
+    };
+    let threshold = options.timestamp_score_threshold;
+    let max = options.max_timestamp_candidates;
+
+    let mut notes = Vec::new();
+    let mut confidence = 1.0;
+    let mut timestamps = Vec::new();
+
+    let value = match &field.value {
+        FieldValue::Varint(v) => {
+            timestamps = timestamps::for_varint(*v, threshold, max);
+            AnalyzedValue::Varint(*v)
+        }
+        FieldValue::I64(v) => {
+            timestamps = timestamps::for_fixed64(*v, threshold, max);
+            AnalyzedValue::Fixed64(*v)
+        }
+        FieldValue::I32(v) => {
+            timestamps = timestamps::for_fixed32(*v, threshold, max);
+            AnalyzedValue::Fixed32(*v)
+        }
+        FieldValue::Group(inner) => AnalyzedValue::Group(walk(inner, &path, options)),
+        FieldValue::Len(len) => {
+            let (v, c) = classify_len(len, &path, options, &mut notes);
+            confidence = c;
+            v
+        }
+    };
+
+    AnalyzedField {
+        path,
+        number: field.number,
+        wire_type: field.wire_type,
+        value,
+        confidence,
+        notes,
+        timestamps,
+    }
+}
+
+/// Classify a length-delimited field, scoring the ambiguity of the reading
+/// `protobuf-core` chose and noting the plausible alternatives.
+fn classify_len(
+    len: &LenValue,
+    path: &str,
+    options: &Options,
+    notes: &mut Vec<String>,
+) -> (AnalyzedValue, f64) {
+    match &len.interp {
+        LenInterp::Message(inner) => {
+            let analyzed = walk(inner, path, options);
+            // A payload that parses as a structured message *and* is printable
+            // text is genuinely ambiguous — short ASCII can parse as a message.
+            if let Some(text) = protobuf_core::printable_utf8(&len.raw) {
+                notes.push(format!("payload also decodes as UTF-8 text: {text:?}"));
+                (
+                    AnalyzedValue::Message(analyzed),
+                    MESSAGE_AMBIGUOUS_CONFIDENCE,
+                )
+            } else {
+                (AnalyzedValue::Message(analyzed), MESSAGE_CONFIDENCE)
+            }
+        }
+        LenInterp::Text(s) => (AnalyzedValue::Text(s.clone()), TEXT_CONFIDENCE),
+        LenInterp::Bytes => {
+            let mut confidence = BYTES_CONFIDENCE;
+            if let Some(vs) = len.as_packed_varints() {
+                notes.push(format!(
+                    "payload also decodes as {} packed varint(s): {vs:?}",
+                    vs.len()
+                ));
+                confidence = BYTES_PACKABLE_CONFIDENCE;
+            }
+            if let Some(vs) = len.as_packed_i32() {
+                notes.push(format!(
+                    "payload also decodes as {} packed fixed32 value(s)",
+                    vs.len()
+                ));
+                confidence = BYTES_PACKABLE_CONFIDENCE;
+            }
+            if let Some(vs) = len.as_packed_i64() {
+                notes.push(format!(
+                    "payload also decodes as {} packed fixed64 value(s)",
+                    vs.len()
+                ));
+                confidence = BYTES_PACKABLE_CONFIDENCE;
+            }
+            (AnalyzedValue::Bytes(len.raw.clone()), confidence)
+        }
+    }
 }
