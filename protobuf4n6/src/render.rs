@@ -4,8 +4,8 @@
 use std::fmt::Write as _;
 use std::io::{self, Write};
 
-use protobuf_forensic_core::WireType;
 use protobuf_forensic::{Analysis, AnalyzedField, AnalyzedValue, TimeSource, TimestampHit};
+use protobuf_forensic_core::WireType;
 
 use crate::Format;
 
