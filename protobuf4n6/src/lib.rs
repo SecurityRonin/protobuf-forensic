@@ -76,8 +76,49 @@ impl From<io::Error> for CliError {
 /// # Errors
 /// [`CliError::Hex`] on odd length or an invalid character.
 pub fn parse_hex(input: &str) -> Result<Vec<u8>, CliError> {
-    let _ = input;
-    unimplemented!("GREEN")
+    // Drop ASCII whitespace and common separators, then an optional 0x prefix.
+    let mut cleaned = String::with_capacity(input.len());
+    for c in input.chars() {
+        if c.is_ascii_whitespace() || matches!(c, ':' | '-' | '_') {
+            continue;
+        }
+        cleaned.push(c);
+    }
+    let hex = cleaned
+        .strip_prefix("0x")
+        .or_else(|| cleaned.strip_prefix("0X"))
+        .unwrap_or(cleaned.as_str());
+
+    let digits = hex.as_bytes();
+    if !digits.len().is_multiple_of(2) {
+        return Err(CliError::Hex {
+            reason: format!("odd number of hex digits ({})", digits.len()),
+        });
+    }
+    let mut out = Vec::with_capacity(digits.len() / 2);
+    let mut chunks = digits.chunks_exact(2);
+    let mut position = 0;
+    for pair in chunks.by_ref() {
+        let hi = hex_nibble(pair[0], position)?;
+        let lo = hex_nibble(pair[1], position + 1)?;
+        out.push((hi << 4) | lo);
+        position += 2;
+    }
+    Ok(out)
+}
+
+fn hex_nibble(byte: u8, position: usize) -> Result<u8, CliError> {
+    match byte {
+        b'0'..=b'9' => Ok(byte - b'0'),
+        b'a'..=b'f' => Ok(byte - b'a' + 10),
+        b'A'..=b'F' => Ok(byte - b'A' + 10),
+        other => Err(CliError::Hex {
+            reason: format!(
+                "non-hex character {:?} at position {position}",
+                char::from(other)
+            ),
+        }),
+    }
 }
 
 /// Decode, analyse, and render `bytes` to `out`.
@@ -91,6 +132,7 @@ pub fn run(
     options: &Options,
     out: &mut dyn Write,
 ) -> Result<(), CliError> {
-    let _ = (bytes, format, options, out);
-    unimplemented!("GREEN")
+    let analysis = protobuf_forensic::analyze_with(bytes, options)?;
+    render::render(&analysis, format, out)?;
+    Ok(())
 }
