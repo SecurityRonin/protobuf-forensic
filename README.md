@@ -67,7 +67,7 @@ tool decodes the wire format directly:
 
 ## Three crates
 
-- **`protobuf-core`** — the schemaless wire decoder. `decode(&[u8]) -> Vec<Field>`.
+- **`protobuf-forensic-core`** — the schemaless wire decoder. `decode(&[u8]) -> Vec<Field>`.
   `#![forbid(unsafe_code)]`, panic-free, **zero dependencies**, low MSRV.
 - **`protobuf-forensic`** — the analysis layer: ambiguity scoring + timeglyph
   timestamp flagging.
@@ -75,7 +75,7 @@ tool decodes the wire format directly:
 
 ## Trust, but verify
 
-`protobuf-core` is validated against an **independent oracle**: `protoc --encode`
+`protobuf-forensic-core` is validated against an **independent oracle**: `protoc --encode`
 produces real wire bytes from a `.proto`, and `protoc --decode_raw` (the
 reference schemaless decoder) is cross-checked field-by-field against our decode.
 See [`docs/validation.md`](https://securityronin.github.io/protobuf-forensic/validation/).

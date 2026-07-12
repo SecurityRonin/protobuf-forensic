@@ -6,9 +6,35 @@ key or real-world data; tier 2 = real engine output whose ground truth is
 derivable from the documented construction or an independent oracle; tier 3 =
 fixtures we authored, legitimate for detection rules and robustness properties).
 
-## `protobuf-core` — the schemaless wire decoder (tier 2, independent oracle)
+## Build-vs-reuse: why a hand-rolled wire decoder
 
-`protobuf-core/tests/oracle.rs` cross-validates against Google's `protoc`
+A schemaless protobuf decoder does exist on crates.io — **`protobuf-core`** (an
+unrelated crate by `wada314`) decodes arbitrary bytes into a field tree without a
+`.proto`. We evaluated it and **rejected it for forensic use** on robustness
+grounds, not because "nothing existed":
+
+- It is **not written to be panic-free** — an `unreachable!()` sits in library
+  code (`src/lib.rs`), and it declares neither `forbid(unsafe)` nor
+  `deny(clippy::unwrap_used/expect_used)`. On attacker-controlled bytes an
+  `unreachable!()` on the decode path is a panic / denial-of-service.
+- It ships **no fuzz target** — the untrusted-input codec has never been fuzzed.
+- MSRV is unspecified; download/maturity is low.
+
+For a decoder on the forensic path — untrusted, attacker-influenced evidence
+bytes — the fleet bar is *never panic, never read out of bounds* (Paranoid
+Gatekeeper). `protobuf-forensic-core` meets it by construction: `forbid(unsafe)`,
+`deny(unwrap_used/expect_used)`, every varint/length bounds-checked, recursion
+depth-capped, and a `cargo-fuzz` target (`protobuf-forensic/fuzz`) that drives
+malformed bytes through the decoder asserting no panic / bounded memory. The wire
+format is ~40 lines, so the reuse win is small and the robustness cost of adopting
+an un-fuzzed, panic-capable dependency is real. (`prost`/`rust-protobuf` are the
+other alternatives — both schema-driven, requiring a `.proto`, so they don't
+address the schemaless case at all.) The correctness of the decode itself is then
+validated against `protoc` as an independent oracle, below.
+
+## `protobuf-forensic-core` — the schemaless wire decoder (tier 2, independent oracle)
+
+`protobuf-forensic-core/tests/oracle.rs` cross-validates against Google's `protoc`
 (env-gated; skips cleanly when `protoc` is absent, set `PROTOC` to override):
 
 - **Independent producer** — `protoc --encode=Test test.proto` turns a text
@@ -30,7 +56,7 @@ field, a UTF-8 string, and non-UTF-8 bytes. Verified locally against
 
 ### Robustness (tier 3, property tests + fuzz)
 
-`protobuf-core/tests/wire.rs` feeds truncated and overlong varints, lying
+`protobuf-forensic-core/tests/wire.rs` feeds truncated and overlong varints, lying
 lengths, invalid wire types, field number 0, unbalanced groups, a 200-deep
 depth bomb, and a deterministic random-byte sweep to the public decoder and
 asserts the property *"returns `Err` (or partial), never panics"*. These are
@@ -78,7 +104,7 @@ crashes and bounded memory (RSS ~ 0.5 GB); `fuzz.yml` runs them weekly.
 The library renderers are exercised across text / JSONL / protoscope formats,
 and the compiled binary is driven end-to-end via `CARGO_BIN_EXE` shell tests
 (file, `--hex`, and stdin inputs; loud non-zero exit on bad input). Correctness
-of the underlying decode rides on the `protobuf-core` oracle above.
+of the underlying decode rides on the `protobuf-forensic-core` oracle above.
 
 ## Coverage
 

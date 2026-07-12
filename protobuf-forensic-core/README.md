@@ -1,4 +1,4 @@
-# protobuf-core
+# protobuf-forensic-core
 
 Schemaless Protocol Buffers wire-format decoder for forensics. Decodes raw
 protobuf bytes with no `.proto` into a recursive field tree, resolving each
