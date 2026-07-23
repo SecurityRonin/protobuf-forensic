@@ -68,7 +68,7 @@ tool decodes the wire format directly:
 ## Three crates
 
 - **`protobuf-forensic-core`** — the schemaless wire decoder. `decode(&[u8]) -> Vec<Field>`.
-  `#![forbid(unsafe_code)]`, panic-free, **zero dependencies**, low MSRV.
+  `#![forbid(unsafe_code)]`, input-fuzzed, panic-free by lint, **zero dependencies**, low MSRV.
 - **`protobuf-forensic`** — the analysis layer: ambiguity scoring + timeglyph
   timestamp flagging.
 - **`protobuf4n6`** — the CLI (text / JSONL / protoscope).
