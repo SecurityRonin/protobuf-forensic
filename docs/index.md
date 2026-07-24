@@ -5,11 +5,11 @@
 ```rust
 // Field 1 = varint 150, nested message in field 3.
 let bytes = [0x08, 0x96, 0x01, 0x1a, 0x03, 0x08, 0x96, 0x01];
-let fields = protobuf_core::decode(&bytes)?;
+let fields = protobuf_forensic_core::decode(&bytes)?;
 for f in &fields {
     println!("field {} wire {:?}", f.number, f.wire_type);
 }
-# Ok::<(), protobuf_core::Error>(())
+# Ok::<(), protobuf_forensic_core::Error>(())
 ```
 
 In forensics you almost never have the `.proto`. Schema-driven decoders
