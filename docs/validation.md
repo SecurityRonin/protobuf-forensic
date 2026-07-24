@@ -13,11 +13,14 @@ unrelated crate by `wada314`) decodes arbitrary bytes into a field tree without 
 `.proto`. We evaluated it and **rejected it for forensic use** on robustness
 grounds, not because "nothing existed":
 
-- It is **not written to be panic-free** — an `unreachable!()` sits in library
-  code (`src/lib.rs`), and it declares neither `forbid(unsafe)` nor
-  `deny(clippy::unwrap_used/expect_used)`. On attacker-controlled bytes an
-  `unreachable!()` on the decode path is a panic / denial-of-service.
-- It ships **no fuzz target** — the untrusted-input codec has never been fuzzed.
+- It is **not written to the fleet panic-free bar** — it declares neither
+  `forbid(unsafe)` nor `deny(clippy::unwrap_used/expect_used)`, so no lint enforces
+  the "never panic on untrusted input" invariant. (Its one `unreachable!()`,
+  `src/lib.rs:222`, is the never-constructible `impl From<Infallible> for
+  ProtobufError` arm — unreachable by type construction, not a decode-path hazard;
+  the read paths use `Result` / `thiserror`.)
+- It ships **no fuzz target** — the untrusted-input codec has never been fuzzed,
+  so its robustness on attacker-controlled bytes is unproven.
 - MSRV is unspecified; download/maturity is low.
 
 For a decoder on the forensic path — untrusted, attacker-influenced evidence
