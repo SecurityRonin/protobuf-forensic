@@ -5,15 +5,15 @@ members = ["protobuf-forensic-core", "protobuf-forensic", "protobuf4n6"]
 # Single source of truth for fields shared by every member (DRY): bump version /
 # edition / license here once; members inherit via `field.workspace = true`.
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "Apache-2.0"
 
 [workspace.dependencies]
 # The schemaless wire decoder, consumed by the forensic layer and the CLI.
-protobuf-forensic-core = { version = "0.1.0", path = "protobuf-forensic-core" }
+protobuf-forensic-core = { version = "0.1.1", path = "protobuf-forensic-core" }
 # The forensic heuristics + timeglyph timestamp flagging, consumed by protobuf4n6.
-protobuf-forensic = { version = "0.1.0", path = "protobuf-forensic" }
+protobuf-forensic = { version = "0.1.1", path = "protobuf-forensic" }
 # The fleet timestamp decipherer — runs candidate integer field values through
 # every timestamp epoch/format.
 timeglyph = { version = "0.4" }
