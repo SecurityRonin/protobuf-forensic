@@ -17,13 +17,13 @@ url = "https://raw.githubusercontent.com/google/rust-crate-audits/main/audits.to
 url = "https://raw.githubusercontent.com/mozilla/supply-chain/main/audits.toml"
 
 [policy.protobuf-forensic]
-audit-as-crates-io = true
+audit-as-crates-io = false
 
 [policy.protobuf-forensic-core]
-audit-as-crates-io = true
+audit-as-crates-io = false
 
 [policy.protobuf4n6]
-audit-as-crates-io = true
+audit-as-crates-io = false
 
 [[exemptions.aho-corasick]]
 version = "1.1.4"
@@ -207,18 +207,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.portable-atomic-util]]
 version = "0.2.7"
-criteria = "safe-to-deploy"
-
-[[exemptions.protobuf-forensic]]
-version = "0.1.0"
-criteria = "safe-to-deploy"
-
-[[exemptions.protobuf-forensic-core]]
-version = "0.1.0"
-criteria = "safe-to-deploy"
-
-[[exemptions.protobuf4n6]]
-version = "0.1.0"
 criteria = "safe-to-deploy"
 
 [[exemptions.quote]]
