@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "protobuf-forensic"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "protobuf-forensic-core",
  "timeglyph",
@@ -501,11 +501,11 @@ dependencies = [
 
 [[package]]
 name = "protobuf-forensic-core"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "protobuf4n6"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "protobuf-forensic",
