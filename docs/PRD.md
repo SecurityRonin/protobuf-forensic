@@ -1,8 +1,8 @@
 # protobuf-forensic — Product Requirements
 
 *A reverse-written intent document. Every current-state claim below is grounded in a
-same-session read of the workspace (`Cargo.toml` members, `protobuf-forensic-core/src/`,
-`protobuf-forensic/src/`, `protobuf4n6/src/`, `docs/validation.md`, `README.md`) and the
+same-session read of the workspace (`Cargo.toml` members, `core/src/`,
+`forensic/src/`, `cli/src/`, `docs/validation.md`, `README.md`) and the
 git history (2026-07-24). The load-bearing decisions live as ADRs
 [0001](decisions/0001-three-crate-reader-analyzer-cli-layering.md)–[0008](decisions/0008-timestamp-flagging-as-cited-candidates.md)
 under [`docs/decisions/`](decisions/).*
@@ -67,7 +67,7 @@ put in a report.
   with confidence/notes/timestamps), `jsonl` (one machine-faithful JSON object
   per field, path-addressed), or `protoscope` (a protoscope-like `N: value`
   form). Selected with `--format`; timestamp output tuned with `--min-score` /
-  `--max-timestamps` (`protobuf4n6/src/main.rs`, `lib.rs`).
+  `--max-timestamps` (`cli/src/main.rs`, `lib.rs`).
 
 ## Scope
 
@@ -111,7 +111,7 @@ alone (`docs/validation.md`):
   decoder this crate reimplements) is cross-checked field-by-field against our
   decode over a blob spanning every wire type, a submessage, a packed repeated
   field, a UTF-8 string, and non-UTF-8 bytes
-  (`protobuf-forensic-core/tests/oracle.rs`, env-gated on `protoc`).
+  (`core/tests/oracle.rs`, env-gated on `protoc`).
 - **Tier-2 for timestamp flagging.** Known values (a Unix second → 2020-09-13; a
   `fixed64` double as a Cocoa/CFAbsoluteTime reading) whose civil rendering is
   derivable and confirmed by `timeglyph`'s own decode.

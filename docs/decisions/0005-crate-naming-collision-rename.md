@@ -21,7 +21,7 @@ Rename the reader crate `protobuf-core` → **`protobuf-forensic-core`**
 (commit `ea35016`, "refactor: rename protobuf-core -> protobuf-forensic-core
 (crates.io name collision)"). The analyzer stays `protobuf-forensic` and the CLI
 `protobuf4n6`. The import path is kept ergonomic via `[lib] name =
-"protobuf_forensic_core"` (`protobuf-forensic-core/Cargo.toml`), so consumers
+"protobuf_forensic_core"` (`core/Cargo.toml`), so consumers
 write `use protobuf_forensic_core::…`.
 
 ## Consequences
