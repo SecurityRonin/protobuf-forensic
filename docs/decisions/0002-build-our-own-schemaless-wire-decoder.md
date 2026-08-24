@@ -37,7 +37,7 @@ wire_type`; wire types 0/1/2/5 plus the deprecated group markers 3/4), roughly
 adopting an un-fuzzed, panic-capable dependency is real.
 
 Correctness is not taken on faith: it is cross-validated against Google's
-`protoc` as an independent oracle (`protobuf-forensic-core/tests/oracle.rs`, ADR
+`protoc` as an independent oracle (`core/tests/oracle.rs`, ADR
 evidence in `docs/validation.md`), so building our own does not forfeit
 third-party verification.
 

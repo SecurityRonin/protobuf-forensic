@@ -22,18 +22,18 @@ follows the `<x>4n6` convention.
 ## Decision
 
 Split the workspace into three members with a strictly downward dependency
-arrow (`Cargo.toml` `members = ["protobuf-forensic-core", "protobuf-forensic",
+arrow (`Cargo.toml` `members = ["core", "forensic",
 "protobuf4n6"]`):
 
 1. **`protobuf-forensic-core`** — the schemaless wire decoder. `decode(&[u8]) ->
    Vec<Field>`, pure `std`, zero dependencies, low MSRV. No findings, no
-   heuristics. (`protobuf-forensic-core/src/lib.rs`, `reader.rs`.)
+   heuristics. (`core/src/lib.rs`, `reader.rs`.)
 2. **`protobuf-forensic`** — the analysis layer. Depends on the core crate plus
    `timeglyph`; adds `*_CONFIDENCE` ambiguity scoring and `TimestampHit`
-   flagging (`protobuf-forensic/src/lib.rs`, `timestamps.rs`).
+   flagging (`forensic/src/lib.rs`, `timestamps.rs`).
 3. **`protobuf4n6`** — the CLI. Depends on both libraries plus `clap` /
    `serde_json`; a thin humble-object `main.rs` shell over a testable `lib.rs`
-   (`protobuf4n6/src/main.rs`, `lib.rs`).
+   (`cli/src/main.rs`, `lib.rs`).
 
 The core crate never imports the analyzer; the analyzer never imports the CLI.
 

@@ -27,7 +27,7 @@ For a decoder on the forensic path — untrusted, attacker-influenced evidence
 bytes — the fleet bar is *never panic, never read out of bounds* (Paranoid
 Gatekeeper). `protobuf-forensic-core` meets it by construction: `forbid(unsafe)`,
 `deny(unwrap_used/expect_used)`, every varint/length bounds-checked, recursion
-depth-capped, and a `cargo-fuzz` target (`protobuf-forensic/fuzz`) that drives
+depth-capped, and a `cargo-fuzz` target (`forensic/fuzz`) that drives
 malformed bytes through the decoder asserting no panic / bounded memory. The wire
 format is ~40 lines, so the reuse win is small and the robustness cost of adopting
 an un-fuzzed, panic-capable dependency is real. (`prost`/`rust-protobuf` are the
@@ -37,7 +37,7 @@ validated against `protoc` as an independent oracle, below.
 
 ## `protobuf-forensic-core` — the schemaless wire decoder (tier 2, independent oracle)
 
-`protobuf-forensic-core/tests/oracle.rs` cross-validates against Google's `protoc`
+`core/tests/oracle.rs` cross-validates against Google's `protoc`
 (env-gated; skips cleanly when `protoc` is absent, set `PROTOC` to override):
 
 - **Independent producer** — `protoc --encode=Test test.proto` turns a text
@@ -59,7 +59,7 @@ field, a UTF-8 string, and non-UTF-8 bytes. Verified locally against
 
 ### Robustness (tier 3, property tests + fuzz)
 
-`protobuf-forensic-core/tests/wire.rs` feeds truncated and overlong varints, lying
+`core/tests/wire.rs` feeds truncated and overlong varints, lying
 lengths, invalid wire types, field number 0, unbalanced groups, a 200-deep
 depth bomb, and a deterministic random-byte sweep to the public decoder and
 asserts the property *"returns `Err` (or partial), never panics"*. These are

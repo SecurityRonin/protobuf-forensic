@@ -20,7 +20,7 @@ presenting an inference as a fact.
 ## Decision
 
 Run every integer-bearing field view through `timeglyph` in
-`protobuf-forensic/src/timestamps.rs` (varint as signed int; `fixed32`/`fixed64`
+`forensic/src/timestamps.rs` (varint as signed int; `fixed32`/`fixed64`
 as int; `fixed64` also as a double) and attach the results as `TimestampHit`s —
 **capped, ranked, and cited**, never as a decoded value on the field:
 

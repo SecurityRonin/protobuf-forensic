@@ -24,7 +24,7 @@ dependency, costing the "zero dependencies" property that
 
 Keep `protobuf-forensic-core` **zero-dependency** and implement a small,
 self-contained bounds-checked forward cursor in-crate
-(`protobuf-forensic-core/src/reader.rs`, `struct Cursor`). Every read is
+(`core/src/reader.rs`, `struct Cursor`). Every read is
 length-checked before it happens — `read_varint` rejects truncated/overlong
 varints, `take`/`take_len` reject a length that exceeds the bytes remaining, and
 the fixed reads (`read_u32_le`/`read_u64_le`) index only after a checked `take`.

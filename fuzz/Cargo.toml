@@ -15,10 +15,10 @@ cargo-fuzz = true
 libfuzzer-sys = "0.4"
 
 [dependencies.protobuf-forensic-core]
-path = "../protobuf-forensic-core"
+path = "../core"
 
 [dependencies.protobuf-forensic]
-path = "../protobuf-forensic"
+path = "../forensic"
 
 [[bin]]
 name = "decode"
